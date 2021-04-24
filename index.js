@@ -1,6 +1,6 @@
 // --------------------
 // Author: Dennis Suarez
-// Date: Arpil 17th 2021
+// Date: April 17th 2021
 // --------------------
 
 
@@ -8,35 +8,64 @@
 // Express Setup
 // --------------------
 const express = require("express");
-const { Mongoose } = require("mongoose");
 const app = express();
 app.use(express.json)
-const HTTP_PORT = process.env.PORT || 8080;
 
 // -------------------
 // Database
 // -------------------
-const db_url = "mongodb+srv://sheridan:NewAssignment@dsuarez.no5ih.mongodb.net/A4?retryWrites=true&w=majority"
-const connectToDb = () => {
-    return mongoose.connect(db_url, {userNewUrlParser:true,useUnifiedTopology:true})
-}
+const mongoose = require("mongoose")
+const Schema = mongoose.Schema;
+const mongoURL = "mongodb+srv://sheridan:NewAssignment@dsuarez.no5ih.mongodb.net/A4?retryWrites=true&w=majority"
+const connectionOptions = {useNewUrlParser: true, useUnifiedTopology: true}
 
-var mongoose = require("mongoose");
-const {Schema} = mongoose;
+// connect to the database and check that it worked
+mongoose.connect(mongoURL, connectionOptions).then(
+    () => {
+        console.log("Connected successfully to your database")
+    }
+).catch(
+    (err) => {
+        console.log("Error connecting to the database")
+        console.log(err)
+    }
+)
 
-var itemSchema = new Schema({
-  "item":  String,
-  "rarity": String,
-  "description": String,
-  "goldPerTurn": {
-    "type": Number,
-    "default": 0
+// Item table definition
+const ItemSchema  = new Schema({
+  item:  String,
+  rarity: String,
+  description: String,
+  goldPerTurn: {
+    type: Number,
+    default: 0
   }
 });
 
-var Company = mongoose.model("a4_items", itemSchema);
+const Item = mongoose.model("items_table", ItemSchema)
 
+//Mass insert items.
 
+/*const i1 = Item({item:"Magpie", rarity:"common", description:"Gives 9 gold every 4 spins", goldPerTurn:-1})
+const i2 = Item({item:"King Midas", rarity:"rare", description:"Adds 1 Gold each turn. Adjacent Gold gives 3x more gold", goldPerTurn:2})
+const i3 = Item({item:"Bee", rarity:"uncommon", description:"Adjacent Flowers give 2x more gold", goldPerTurn:1})
+const i4 = Item({item:"Goose", rarity:"common", description:"Has a 1% chance of adding a Golden egg", goldPerTurn:1})
+const i5 = Item({item:"Golden Egg", rarity:"rare", description:"", goldPerTurn:3})
+const i6 = Item({item:"Cat", rarity:"common", description:"", goldPerTurn:1})
+const i7 = Item({item:"Void Stone", rarity:"uncommon", description:"Adjacent empty squares give 1 coin more. Destroys itelf if adjacent to 0 empty squares. Gives 8 coins when destroyed", goldPerTurn:0})
+
+Item.create([i1, i2, i3, i4, i5, i6, i7]).then(
+         () => {
+             console.log("Bulk Insert with create was successful")
+         }
+     ).catch(
+         (err) => {
+             console.log("Error bulk inserting with create into the table.")
+             console.log(err)
+         }
+     )      
+
+*/
 
 // --------------------
 // URL Endpoints
@@ -68,15 +97,4 @@ app.post("/api/items/", (req, res) => {
     res.send("Hello Wolrd!");
 })
 
-const onHttpStart = () => {
-    console.log('Server has started and is listening on port:' + HTTP_PORT)
-}
-
-connectToDb().then(()=> {
-    console.log("Connected to DB.")
-    console.log("Starting Server")
-    app.listen(HTTP_PORT, onHttpStart)
-}).catch ((error)=> {
-    console.log("Error from Database")
-    console.log(error)
-})
+module.exports = app
